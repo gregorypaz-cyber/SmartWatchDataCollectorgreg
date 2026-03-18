@@ -1,61 +1,260 @@
+# SmartWatch Data Collector
 
-# Description of the project
-!! Developed and tested on Amazfit GTR 3 Pro running Zepp OS v1.0!!
+Export every sensor reading from your Amazfit watch to your own server. Take back ownership of your health data.
 
-There is only one problem with almost all existing smartwatches, and that is that you cannot export your own data for personal use. I own an **Amazfit GTR 3 Pro** watch, which had exactly this problem, so I had to come up with my own solution to retrieve my data from ALL the available sensors. 
+[![License: GPL-3.0](https://img.shields.io/badge/License-GPL--3.0-blue.svg?style=flat-square)](LICENSE)
+[![Zepp OS](https://img.shields.io/badge/Zepp%20OS-v1.0-black?style=flat-square)](https://docs.zepp.com/docs/1.0/intro/)
+[![Platform](https://img.shields.io/badge/Platform-Amazfit%20GTR%203%20Pro-red?style=flat-square)](https://www.amazfit.com)
 
-**It is important to note that this is not a formal solution, I would call it a workaround. It is very complicated but unfortunately it is the only way to go.** If you're also looking for a solution to this problem, I suggest you check [**THIS**](https://user.huami.com/privacy/index.html#/) link first, you may find the information available here sufficient.
+---
 
-This project was mainly about functionality, so the watch face is not necessarily the most design-oriented. It is possible to create your own face, or if you want to modify the current one, you can find the assets **[here](https://www.figma.com/file/vRE1wTHGOqUN3NSEEFcj5b/Untitled?type=design&node-id=0:1&mode=design&t=6gdPgM8FrmKmiMb8-1)**
+## The Problem
+
+Amazfit and most smartwatch manufacturers lock your personal health data behind their own apps and cloud services. There is no official export for raw sensor readings. This project is a workaround: a custom watch face that continuously collects all sensor data in the background, a watch app that syncs it to your server, and a lightweight PHP receiver on the server side.
+
+**Your body data. Your server. Your control.**
+
+---
+
+## Screenshots
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/Fullbaro/SmartWatchDataCollector/main/WatchFace/assets/480x480-amazfit-gtr-3-pro/screenshot.png" width="200" title="screenshot">
+  <img src="https://raw.githubusercontent.com/Fullbaro/SmartWatchDataCollector/main/WatchFace/assets/480x480-amazfit-gtr-3-pro/screenshot.png" width="180" title="Watch face">
+  <img src="https://raw.githubusercontent.com/Fullbaro/SmartWatchDataCollector/main/App/assets/common/screenshot_1.png" width="180" title="App screen 1">
+  <img src="https://raw.githubusercontent.com/Fullbaro/SmartWatchDataCollector/main/App/assets/common/screenshot_2.png" width="180" title="App screen 2">
+  <img src="https://raw.githubusercontent.com/Fullbaro/SmartWatchDataCollector/main/App/assets/common/screenshot_3.png" width="180" title="App screen 3">
+  <img src="https://raw.githubusercontent.com/Fullbaro/SmartWatchDataCollector/main/App/assets/common/screenshot_4.png" width="180" title="App screen 4">
 </p>
 
-The app for sending data to the server has been complemented by a scrollable interface with buttons arranged in a number of catetogies. These buttons, such as food and drink, are used to manually enter data that the watch cannot keep track of by default.
+---
 
-<p align="center">
-	<img src="https://raw.githubusercontent.com/Fullbaro/SmartWatchDataCollector/main/App/assets/common/screenshot_1.png" width="200" title="screenshot">
-	<img src="https://raw.githubusercontent.com/Fullbaro/SmartWatchDataCollector/main/App/assets/common/screenshot_2.png" width="200" title="screenshot">
-	<img src="https://raw.githubusercontent.com/Fullbaro/SmartWatchDataCollector/main/App/assets/common/screenshot_3.png" width="200" title="screenshot">
-	<img src="https://raw.githubusercontent.com/Fullbaro/SmartWatchDataCollector/main/App/assets/common/screenshot_4.png" width="200" title="screenshot">
-	<img src="https://raw.githubusercontent.com/Fullbaro/SmartWatchDataCollector/main/App/assets/common/screenshot_5.png" width="200" title="screenshot">
-</p>
+## How It Works
 
-# How does it work?
+Zepp OS imposes two major restrictions: watch apps cannot run in the background, and they have no direct internet access. This project works around both:
 
-The Amazfit watches run on **Zepp OS**, on which it is possible to write apps and watch faces. In my case, I am running the **V1.0** version of Zepp OS, which is much more limited than the newer ones, making the process even more complicated.
+```
+[Watch Face]  -- continuously collects sensor data --> [Watch Storage]
+     |                                                        |
+[Watch App]  <---- reads on demand -------------------------+
+     |
+[App-Side Service]  -- HTTP POST --> [Your Server]  --> [CSV files]
+```
 
-1. You need to create a **watch face** that reads the data from the sensors and then saves it to the root directory of the clock, which is available to other apps. This is needed because it is the only program that runs continuously  on the watch as if it were a background process.
-2. You need to create an **app** for the watch, which when opened, reads the data from the globally available file, then passes it to the **app-side** part of the program, which has a **fetch-api** function so it can send it to a server.
+1. **Watch Face** runs as a persistent background process. It polls all sensors every 5 minutes (configurable) and appends readings to local storage files.
+2. **Watch App** is opened manually when you want to sync. It reads the accumulated data from storage and passes it to the app-side component.
+3. **App-Side Service** runs on your phone (via the Zepp app). It has internet access and forwards the data to your server as HTTP POST requests.
+4. **PHP Server** receives the data, validates the secret key, and appends rows to CSV files organized by data type.
 
-	The app is what **runs on the watch.** They can't run in the background, they only work when they are open and don't have internet access by default. Therefore you need an app-side part **running on the device**, so it is possible to send the data using an **HTTP POST request**
-3. Finally, you need a **server** that can receive POST requests and then save the data to a database or wherever you want
+---
 
-# Setting requirements
-1.  All available sensors should be switched on to read the values automatically
-2. The clock face must be set to always on
-3. You need to turn on the developer options in the Zepp phone app. Go to "Profile" => "Settings" => "About" and click the Zepp icon 7 times in a row until a pop-up window appears
+## What Gets Collected
 
-# Installation
+### Automatic (Watch Face)
 
-Note that for writing any program for Zepp OS, an excellent documentation is available at the following link: [https://docs.zepp.com/docs/1.0/intro/](https://docs.zepp.com/docs/1.0/intro/)
+| Category | Fields |
+|----------|--------|
+| Basic | Battery, steps, calories, distance, standing time |
+| Weather | City, current temperature, forecast high/low |
+| Body temperature | Skin temperature |
+| Heart rate | Value at event time |
+| SpO2 | Blood oxygen saturation at event time |
+| Stress | Stress level at event time |
+| Wear detection | Whether the watch is being worn |
+| Sleep | Start/end time, score, wake/REM/light/deep duration |
 
-1. It is important that you include the path to your own endpoint in the App code ([here](https://github.com/Fullbaro/SmartWatchDataCollector/blob/main/App/utils/config/constants.js)).
-2. Also in this file, for the key parameter, enter a unique secret key. You can generate your own [here](https://www.uuidgenerator.net/)
-3. You can specify how often the watch saves sensor data in [this file](https://github.com/Fullbaro/SmartWatchDataCollector/blob/main/WatchFace/utils/config/constants.js) by changing the `INTERVAL`(ms) variable. Some sensors are event based.
-4. You will need to install the Zeus CLI ([docs](https://docs.zepp.com/docs/1.0/guides/tools/cli/))
-5. Enter **App**/**WatchFace** folder, and execute the `zeus preview` command. 
-6. Scan the **QR code** on the terminal with your phone using the option on the developer tab
-7. I have created a **PHP** file for the server side and to receive the data, but there are many solutions for this purpose. You can place it on an Apache or NGINX web server and then call it over the Internet.
+### Manual (Watch App)
 
-	**It is also important to rewrite the value in the php file to the secret key you generated yourself**
-	
-	**I recommend you to create SSL for your web server to be accessible with HTTPS! Also, disable `data` folder access over the internet!**
+Log events that sensors cannot detect automatically:
 
-## Final thoughts
+| Category | Options |
+|----------|---------|
+| Drinks | Water, juice, soda, energy drink (with quantity) |
+| Food | Light, medium, heavy, very heavy meal |
+| Alcohol | Beer/wine, spirits |
+| Smoking/Vaping | Single tap logging |
+| Bathroom | Urination, bowel movement |
+| Health events | Headache |
 
-**TIP:** Set the bottom button to open the Data Collector App to make it easier to send data frequently
+---
 
-I find it sad that the data collected about my own body can only be extracted in such a complicated and unjustified way. I know that not everyone wants to perform data analysis on themselves, but we should at least be given the opportunity.
-If you are so determined to go through all these steps and have any questions, feel free to contact me
+## Supported Devices
+
+Tested and configured for the following Amazfit models running **Zepp OS v1.0**:
+
+- GTR 3 Pro / GTR 3 Pro Women
+- GTR 3 / GTR 3 Women
+- T-Rex 2 / T-Rex 2 Women
+- GTS 3 / GTS 3 Women
+- GTS 4 / GTS 4 Women
+
+> Developed and tested on the **Amazfit GTR 3 Pro**. Other listed models share the same screen resolution and API version but are untested.
+
+---
+
+## Prerequisites
+
+- An Amazfit watch from the supported list above running **Zepp OS v1.0**
+- The **Zepp** phone app with **developer mode enabled**
+- **Zeus CLI** installed on your computer ([installation guide](https://docs.zepp.com/docs/1.0/guides/tools/cli/))
+- A web server with **PHP** and **HTTPS** support
+
+### Enable Developer Mode
+
+In the Zepp phone app: **Profile > Settings > About**, then tap the Zepp logo 7 times until a confirmation popup appears.
+
+---
+
+## Configuration
+
+### 1. Generate a secret key
+
+Generate a UUID at [uuidgenerator.net](https://www.uuidgenerator.net). You will use the same key in both the app and the server.
+
+### 2. Configure the Watch App
+
+Edit `App/utils/config/constants.js`:
+
+```js
+const ENDPOINT = "https://your-server.com/post.php";  // your server URL
+const KEY = "your-generated-uuid-here";               // secret key
+const CHUNK_SIZE = 250;                               // rows per HTTP request
+const INTERVAL = 300000;                              // collection interval in ms
+```
+
+### 3. Configure the Watch Face
+
+Edit `WatchFace/utils/config/constants.js`:
+
+```js
+const INTERVAL = 300000;  // sensor polling interval in milliseconds (5 minutes)
+```
+
+### 4. Configure the Server
+
+Edit `Server/post.php` and set the same secret key:
+
+```php
+$secret_key = "your-generated-uuid-here";
+```
+
+---
+
+## Installation
+
+### Watch App and Watch Face
+
+1. Install Zeus CLI:
+   ```bash
+   npm install -g @zeppos/zeus-cli
+   ```
+
+2. Build and preview the **Watch Face**:
+   ```bash
+   cd WatchFace
+   zeus preview
+   ```
+   Scan the QR code shown in the terminal using the Zepp app (developer tab).
+
+3. Build and preview the **Watch App**:
+   ```bash
+   cd App
+   zeus preview
+   ```
+   Scan the QR code shown in the terminal using the Zepp app (developer tab).
+
+### Server
+
+1. Place `Server/post.php` on your web server (Apache or NGINX).
+2. Create a `data/` directory next to the PHP file and make it writable by the web server:
+   ```bash
+   mkdir data
+   chmod 750 data
+   ```
+3. Block public access to the `data/` directory in your web server config. Example for NGINX:
+   ```nginx
+   location /data/ {
+       deny all;
+   }
+   ```
+4. Set up HTTPS. Plain HTTP is not recommended since the secret key travels in the request body.
+
+---
+
+## Usage
+
+### Syncing data
+
+1. Open the **Data Collector** app on your watch.
+2. The app reads all accumulated sensor data from storage and sends it to your server in chunks.
+3. Progress is displayed on screen (0 to 100%).
+4. When complete, CSV files are updated on your server under the `data/` directory.
+
+**Tip:** Assign the Data Collector app to the bottom button of your watch for quick access.
+
+### Watch face settings
+
+For reliable background collection, set the watch face to **Always On Display** in the Zepp app settings.
+
+Also ensure all relevant sensors are enabled in the Zepp app:
+- Heart rate continuous monitoring
+- SpO2 monitoring
+- Stress monitoring
+- Sleep tracking
+
+---
+
+## Data Format
+
+Each data type is stored as a CSV file in the `data/` directory on your server.
+
+Example: `data/heart.csv`
+```
+time,value
+1710500000,72
+1710503600,68
+```
+
+All timestamps are **Unix epoch (UTC)**.
+
+---
+
+## Project Structure
+
+```
+SmartWatchDataCollector/
+├── WatchFace/                  # Zepp OS watch face (background data collection)
+│   ├── watchface/index.js      # Main watch face entry point
+│   └── utils/config/           # Interval and storage configuration
+├── App/                        # Zepp OS watch app (manual logging + sync)
+│   ├── pages/index.js          # Watch-side UI
+│   ├── app-side/index.js       # Phone-side HTTP service
+│   └── utils/config/           # Endpoint, key, chunk size configuration
+└── Server/
+    └── post.php                # PHP receiver endpoint
+```
+
+---
+
+## Contributing
+
+Contributions are welcome. If you own a different Zepp OS v1.0 device and want to add support or have verified compatibility, please open an issue or pull request.
+
+If the Zepp API changes between OS versions cause breakage, opening an issue with the OS version and error details helps a lot.
+
+---
+
+## License
+
+This project is licensed under the **GNU General Public License v3.0**.
+See [LICENSE](LICENSE) for the full text.
+
+The GPL-3.0 ensures that any derivative work must also remain open source. If you modify and distribute this project, you must publish your changes under the same license.
+
+---
+
+## Links
+
+- [Zepp OS v1.0 documentation](https://docs.zepp.com/docs/1.0/intro/)
+- [Zeus CLI guide](https://docs.zepp.com/docs/1.0/guides/tools/cli/)
+- [Official Amazfit data export (limited)](https://user.huami.com/privacy/index.html)
+- [Watch face design assets (Figma)](https://www.figma.com/file/vRE1wTHGOqUN3NSEEFcj5b/)
