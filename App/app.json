@@ -33,24 +33,9 @@
         }
       },
       "platforms": [
-        {
-          "name": "bip6"
-        },
-        {
-          "name": "bip5"
-        },
-        {
-          "name": "gtr3-pro",
-          "deviceSource": 229
-        },
-        {
-          "name": "gtr3",
-          "deviceSource": 226
-        },
-        {
-          "name": "gts4",
-          "deviceSource": 7995648
-        }
+         {
+           "name": "all" 
+         }
       ],
       "designWidth": 390
     }
