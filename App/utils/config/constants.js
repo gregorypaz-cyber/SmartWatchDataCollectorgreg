@@ -1,5 +1,5 @@
 export const ENDPOINT = "https://anmyzcmrrgjvqorjqrvr.supabase.co/rest/v1/terra_wearable_data"
-export const KEY = "52f13ff0-8dd1-11ee-b9d1-0242ac120003"
-export const STORAGES = ["basic", "sleep", "heart", "spo2", "stress", "wear", "vape", "drink", "alcohol", "food", "pee", "poo", "headache"]
+export const KEY = "sb_publishable_nIuf4ql2djTbhumb21oGLA_ekc0xX_G"
+export const STORAGES = ["basic", "sleep", "heart", "spo2", "stress", "wear"]
 export const CHUNK_SIZE = 250
 export const ROW_LENGTH = 100

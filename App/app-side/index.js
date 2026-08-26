@@ -10,7 +10,7 @@ async function fetchData(ctx, param) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'apikey': sb_publishable_nIuf4ql2djTbhumb21oGLA_ekc0xX_G,
+        'apikey': KEY,
         'Authorization': `Bearer ${KEY}`
       },
       body: JSON.stringify({        
