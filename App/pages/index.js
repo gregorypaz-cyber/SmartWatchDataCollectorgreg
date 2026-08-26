@@ -7,34 +7,118 @@ const vibrate = hmSensor.createSensor(hmSensor.id.VIBRATE)
 Page({
   state: {},
   build() {
-    console.log("App build begin - Simplified UI")
+    console.log("App build begin")
 
-    // Tela limpa e centralizada que ocupa 100% da tela do Bip 6
-    hmUI.createWidget(hmUI.widget.TEXT, {
+    // Cria o widget de texto (log) na tela principal para exibir o status
+    const statusText = hmUI.createWidget(hmUI.widget.TEXT, {
       x: 10,
-      y: 100,
-      w: 370,
-      h: 100,
-      color: 0xffffff,
-      text_size: 32,
-      align_h: hmUI.align.CENTER_H,
-      align_v: hmUI.align.CENTER_V,
-      text: "DATA COLLECTOR",
-    });
-
-    hmUI.createWidget(hmUI.widget.TEXT, {
-      x: 10,
-      y: 220,
+      y: 20,
       w: 370,
       h: 80,
-      color: 0x00FF00,
-      text_size: 20,
+      color: 0xffffff,
+      text_size: 24,
       align_h: hmUI.align.CENTER_H,
       align_v: hmUI.align.CENTER_V,
-      text: "Sincronizando...",
+      text: "LOADING...",
     });
 
-    // Dispara a sincronização de dados em background com o Supabase
-    fetchAndSendChunks(storages, messageBuilder);
+    // Passa o statusText (log) corretamente como terceiro argumento
+    fetchAndSendChunks(storages, messageBuilder, statusText);
+
+    // Ativa o scroll vertical (7 páginas no total)
+    hmUI.setScrollView(true, px(450), 7, true)
+    
+    const pageH = 450;
+
+    // PAGE #1: VAPE
+    hmUI.createWidget(hmUI.widget.FILL_RECT, { x: 0, y: pageH * 1, w: 390, h: pageH, color: 0x003049 })
+    hmUI.createWidget(hmUI.widget.BUTTON, {
+      x: 95, y: 125 + pageH * 1, w: 200, h: 200,
+      normal_src: 'vape.png', press_src: 'vape_press.png',
+      click_func: () => {
+        storages.vape.append(time.utc)
+        vibrate.stop(); vibrate.scene = 25; vibrate.start();
+      }
+    })
+
+    // PAGE #2: DRINKS
+    hmUI.createWidget(hmUI.widget.FILL_RECT, { x: 0, y: pageH * 2, w: 390, h: pageH, color: 0xd62828 })
+    hmUI.createWidget(hmUI.widget.BUTTON, {
+      x: 40, y: 80 + pageH * 2, w: 140, h: 140,
+      normal_src: 'drink_1.png', press_src: 'drink_1_press.png',
+      click_func: () => { storages.drink.append(`${time.utc};${1}`); vibrate.stop(); vibrate.scene = 25; vibrate.start(); }
+    })
+    hmUI.createWidget(hmUI.widget.BUTTON, {
+      x: 210, y: 80 + pageH * 2, w: 140, h: 140,
+      normal_src: 'drink_2.png', press_src: 'drink_2_press.png',
+      click_func: () => { storages.drink.append(`${time.utc};${3}`); vibrate.stop(); vibrate.scene = 25; vibrate.start(); }
+    })
+    hmUI.createWidget(hmUI.widget.BUTTON, {
+      x: 40, y: 235 + pageH * 2, w: 140, h: 140,
+      normal_src: 'drink_3.png', press_src: 'drink_3_press.png',
+      click_func: () => { storages.drink.append(`${time.utc};${5}`); vibrate.stop(); vibrate.scene = 25; vibrate.start(); }
+    })
+    hmUI.createWidget(hmUI.widget.BUTTON, {
+      x: 210, y: 235 + pageH * 2, w: 140, h: 140,
+      normal_src: 'drink_4.png', press_src: 'drink_4_press.png',
+      click_func: () => { storages.drink.append(`${time.utc};${20}`); vibrate.stop(); vibrate.scene = 25; vibrate.start(); }
+    })
+
+    // PAGE #3: FOOD
+    hmUI.createWidget(hmUI.widget.FILL_RECT, { x: 0, y: pageH * 3, w: 390, h: pageH, color: 0xf77f00 })
+    hmUI.createWidget(hmUI.widget.BUTTON, {
+      x: 40, y: 80 + pageH * 3, w: 140, h: 140,
+      normal_src: 'food_1.png', press_src: 'food_1_press.png',
+      click_func: () => { storages.food.append(`${time.utc};${1}`); vibrate.stop(); vibrate.scene = 25; vibrate.start(); }
+    })
+    hmUI.createWidget(hmUI.widget.BUTTON, {
+      x: 210, y: 80 + pageH * 3, w: 140, h: 140,
+      normal_src: 'food_2.png', press_src: 'food_2_press.png',
+      click_func: () => { storages.food.append(`${time.utc};${2}`); vibrate.stop(); vibrate.scene = 25; vibrate.start(); }
+    })
+    hmUI.createWidget(hmUI.widget.BUTTON, {
+      x: 40, y: 235 + pageH * 3, w: 140, h: 140,
+      normal_src: 'food_3.png', press_src: 'food_3_press.png',
+      click_func: () => { storages.food.append(`${time.utc};${6}`); vibrate.stop(); vibrate.scene = 25; vibrate.start(); }
+    })
+    hmUI.createWidget(hmUI.widget.BUTTON, {
+      x: 210, y: 235 + pageH * 3, w: 140, h: 140,
+      normal_src: 'food_4.png', press_src: 'food_4_press.png',
+      click_func: () => { storages.food.append(`${time.utc};${9}`); vibrate.stop(); vibrate.scene = 25; vibrate.start(); }
+    })
+
+    // PAGE #4: ALCOHOL
+    hmUI.createWidget(hmUI.widget.FILL_RECT, { x: 0, y: pageH * 4, w: 390, h: pageH, color: 0xfcbf49 })
+    hmUI.createWidget(hmUI.widget.BUTTON, {
+      x: 40, y: 135 + pageH * 4, w: 140, h: 140,
+      normal_src: 'alcohol_1.png', press_src: 'alcohol_1_press.png',
+      click_func: () => { storages.alcohol.append(`${time.utc};${1}`); vibrate.stop(); vibrate.scene = 25; vibrate.start(); }
+    })
+    hmUI.createWidget(hmUI.widget.BUTTON, {
+      x: 210, y: 135 + pageH * 4, w: 140, h: 140,
+      normal_src: 'alcohol_2.png', press_src: 'alcohol_2_press.png',
+      click_func: () => { storages.alcohol.append(`${time.utc};${3}`); vibrate.stop(); vibrate.scene = 25; vibrate.start(); }
+    })
+
+    // PAGE #5: PEE / POO
+    hmUI.createWidget(hmUI.widget.FILL_RECT, { x: 0, y: pageH * 5, w: 390, h: pageH, color: 0xeae2b7 })
+    hmUI.createWidget(hmUI.widget.BUTTON, {
+      x: 40, y: 135 + pageH * 5, w: 140, h: 140,
+      normal_src: 'pee.png', press_src: 'pee_press.png',
+      click_func: () => { storages.pee.append(time.utc); vibrate.stop(); vibrate.scene = 25; vibrate.start(); }
+    })
+    hmUI.createWidget(hmUI.widget.BUTTON, {
+      x: 210, y: 135 + pageH * 5, w: 140, h: 140,
+      normal_src: 'poo.png', press_src: 'poo_press.png',
+      click_func: () => { storages.poo.append(time.utc); vibrate.stop(); vibrate.scene = 25; vibrate.start(); }
+    })
+
+    // PAGE #6: HEADACHE
+    hmUI.createWidget(hmUI.widget.FILL_RECT, { x: 0, y: pageH * 6, w: 390, h: pageH, color: 0xf9f7eb })
+    hmUI.createWidget(hmUI.widget.BUTTON, {
+      x: 95, y: 125 + pageH * 6, w: 200, h: 200,
+      normal_src: 'headache.png', press_src: 'headache_press.png',
+      click_func: () => { storages.headache.append(time.utc); vibrate.stop(); vibrate.scene = 25; vibrate.start(); }
+    })
   }
 });
