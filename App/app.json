@@ -15,9 +15,9 @@
   "permissions": [],
   "runtime": {
     "apiVersion": {
-      "compatible": "2.0.0",
-      "target": "2.0.0",
-      "minVersion": "2.0.0"
+      "compatible": "1.0.0",
+      "target": "1.0.1",
+      "minVersion": "1.0.0"
     }
   },
   "targets": {
@@ -34,11 +34,11 @@
       },
       "platforms": [
         {
-          "name": "gts4",
-          "deviceSource": 7995648
+          "name": "gts3",
+          "deviceSource": 224
         }
       ],
-      "designWidth": 390
+      "designWidth": 480
     }
   },
   "i18n": {
