@@ -5,17 +5,18 @@ const messageBuilder = new MessageBuilder();
 
 async function fetchData(ctx, param) {
   try {    
-
     const res = await fetch({
       url: ENDPOINT,
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'apikey': sb_publishable_nIuf4ql2djTbhumb21oGLA_ekc0xX_G,
+        'Authorization': `Bearer ${KEY}`
       },
       body: JSON.stringify({        
-        data: param.data,
         type: param.type,
-        key: KEY
+        provider: 'ZEPP',
+        raw_payload: param.data 
       })
     })
 
@@ -27,7 +28,7 @@ async function fetchData(ctx, param) {
 
   } catch (error) {        
     ctx.response({
-      data: { result: "ERROR-"+error.message },
+      data: { result: "ERROR-" + error.message },
     });
   }
 };
