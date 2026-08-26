@@ -34,11 +34,11 @@
       },
       "platforms": [
         {
-          "name": "gts3",
-          "deviceSource": 224
+          "name": "gts4",
+          "deviceSource": 7995648
         }
       ],
-      "designWidth": 480
+      "designWidth": 390
     }
   },
   "i18n": {
