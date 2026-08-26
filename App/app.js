@@ -1,3 +1,4 @@
+import "./shared/device-polyfill";
 import { MessageBuilder } from "./shared/message";
 import LocalStorage from './shared/storage'
 import { STORAGES } from './utils/config/constants'
@@ -10,9 +11,8 @@ App({
   onCreate(options) {
     console.log("app on create invoke");
 
-    // Cria os arquivos de forma limpa, sem o hack de pastas do ZeppOS antigo
     for(const element of STORAGES) {
-      this.globalData.storages[element] = new LocalStorage(element + "_storage.txt")
+      this.globalData.storages[element] = new LocalStorage(element + "_storage.txt");
     }
 
     let appId;
