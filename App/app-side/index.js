@@ -18,13 +18,13 @@ async function fetchData(ctx, param) {
         provider: 'ZEPP',
         raw_payload: param.data 
       })
-    })
+    });
 
-    const resBody = typeof res.body === 'string' ? JSON.parse(res.body) : res.body
-
+    // O Supabase salva e retorna sucesso com corpo vazio. 
+    // Em vez de tentar fazer JSON.parse do nada, simplesmente assumimos que deu certo se não caiu no catch!
     ctx.response({
-      data: { result: resBody },
-    })
+      data: { result: "OK" },
+    });
 
   } catch (error) {        
     ctx.response({
